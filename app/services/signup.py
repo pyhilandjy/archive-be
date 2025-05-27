@@ -6,7 +6,6 @@ from app.db.worker import execute_insert_update_query, execute_select_query
 from app.db.query import INSERT_USER_SIGN, CHECK_EMAIL_EXISTS
 from email.message import EmailMessage
 import aiosmtplib
-import os
 from app.config import settings
 
 
@@ -39,7 +38,7 @@ def generate_otp(length: int = 6) -> str:
     return "".join([str(random.randint(0, 9)) for _ in range(length)])
 
 
-async def user_signup(email: str, password: str, user_name: str):
+async def user_signup(email: str, password: str):
     """
     회원가입 API - 이메일 인증된 사용자만 가입 가능
     """
@@ -57,7 +56,6 @@ async def user_signup(email: str, password: str, user_name: str):
             params={
                 "email": email,
                 "password_hash": password_hash,
-                "user_name": user_name,
             },
             return_id=True,
         )
@@ -74,8 +72,8 @@ async def user_verify_request(email: str):
     """
     이메일 인증 요청 API - OTP 생성 + Redis 저장 + 이메일 발송
     """
-
-    if await execute_select_query(query=CHECK_EMAIL_EXISTS, params={"email": email}):
+    is_exist = execute_select_query(query=CHECK_EMAIL_EXISTS, params={"email": email})
+    if is_exist[0]["exists"]:
         raise HTTPException(status_code=400, detail="이미 가입된 이메일입니다.")
     if r.get(f"otp_cooldown:{email}"):
         raise HTTPException(status_code=429, detail="잠시 후 다시 시도해주세요.")
