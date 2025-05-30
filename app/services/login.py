@@ -1,7 +1,7 @@
 from app.core.config import settings
 from fastapi import HTTPException
 from app.db.worker import execute_select_query
-from app.db.query import USER_LOGIN_DATA
+from app.db.query import USER_LOGIN_DATA, USER_EMAIL
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -34,8 +34,8 @@ async def test_function(user_id: str):
     """
     테스트용 함수로, 현재 세션 ID를 반환합니다.
     """
-    id = execute_select_query(
-        "SELECT id FROM test WHERE user_id = :user_id",
+    email = execute_select_query(
+        USER_EMAIL,
         params={"user_id": user_id},
     )
-    return id
+    return email
