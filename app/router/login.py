@@ -27,10 +27,11 @@ async def login(request: LoginRequest, response: Response):
 
 @router.get("/me")
 async def get_me(user_id: str = Depends(get_current_user)):
-    test = test_function(user_id)
-    if not test:
+    user_id = str(user_id)
+    email = await test_function(user_id)
+    if not email:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-    return {"user_id": user_id}
+    return email
 
 
 @router.get("/check-cookie")
