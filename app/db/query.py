@@ -19,3 +19,10 @@ USER_LOGIN_DATA = text(
     SELECT id, password_hash FROM users WHERE email = :email
     """
 )
+
+
+USER_EMAIL = text(
+    """
+    SELECT email FROM users WHERE id = :user_id
+    """
+)
