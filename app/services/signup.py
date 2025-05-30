@@ -6,7 +6,7 @@ from app.db.worker import execute_insert_update_query, execute_select_query
 from app.db.query import INSERT_USER_SIGN, CHECK_EMAIL_EXISTS
 from email.message import EmailMessage
 import aiosmtplib
-from app.config import settings
+from app.core.config import settings
 
 
 # Redis 연결
@@ -45,7 +45,7 @@ async def user_signup(email: str, password: str):
     verified = r.get(f"verified:{email}")
     if verified != "true":
         raise HTTPException(
-            status_code=400, detail="이메일 인증이 완료되지 않았습니다."
+            status_code=400, detail=[{"msg": "이메일 인증이 완료되지 않았습니다."}]
         )
 
     password_hash = pwd_context.hash(password)
@@ -74,14 +74,18 @@ async def user_verify_request(email: str):
     """
     is_exist = execute_select_query(query=CHECK_EMAIL_EXISTS, params={"email": email})
     if is_exist[0]["exists"]:
-        raise HTTPException(status_code=400, detail="이미 가입된 이메일입니다.")
+        raise HTTPException(
+            status_code=409, detail=[{"msg": "이미 가입된 이메일입니다."}]
+        )
     if r.get(f"otp_cooldown:{email}"):
-        raise HTTPException(status_code=429, detail="잠시 후 다시 시도해주세요.")
+        raise HTTPException(
+            status_code=429, detail=[{"msg": "잠시 후 다시 시도해주세요."}]
+        )
 
     otp = generate_otp()
 
     r.setex(f"otp:{email}", 300, otp)  # 5분 유효
-    r.setex(f"otp_cooldown:{email}", 30, "1")  # 30초 쿨다운
+    r.setex(f"otp_cooldown:{email}", 10, "1")  # 30초 쿨다운
 
     # 이메일 전송
     await send_email_otp(email, otp)
@@ -95,11 +99,13 @@ async def user_verify(email: str, otp: str):
     stored_otp = r.get(f"otp:{email}")
     if not stored_otp:
         raise HTTPException(
-            status_code=400, detail="OTP가 존재하지 않거나 만료되었습니다."
+            status_code=400, detail=[{"msg": "OTP가 존재하지 않거나 만료되었습니다."}]
         )
 
     if stored_otp != otp:
-        raise HTTPException(status_code=400, detail="OTP가 올바르지 않습니다.")
+        raise HTTPException(
+            status_code=400, detail=[{"msg": "OTP가 올바르지 않습니다."}]
+        )
 
     # 검증 성공 처리
     r.delete(f"otp:{email}")  # OTP 재사용 방지
