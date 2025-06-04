@@ -47,7 +47,7 @@ GET_CATEGORIES = text(
     """
 )
 
-UPDATE_MAIN_CATEGORY = text(
+UPDATE_CATEGORY = text(
     """
     update category
     set title = :title
@@ -55,7 +55,7 @@ UPDATE_MAIN_CATEGORY = text(
     """
 )
 
-DELETE_MAIN_CATEGORY = text(
+DELETE_CATEGORY = text(
     """
     delete from category
     where id = :id and user_id = :user_id

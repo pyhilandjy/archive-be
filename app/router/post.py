@@ -5,8 +5,8 @@ from app.services.post import (
     post_main_category,
     get_categories,
     post_sub_category,
-    put_main_category,
-    delete_main_category,
+    put_category,
+    delete_category,
 )
 
 router = APIRouter()
@@ -59,8 +59,8 @@ class UpdateMainCategoryRequest(BaseModel):
     title: str
 
 
-@router.put("/main-category/{id}")
-async def update_main_category(
+@router.put("/category/{id}")
+async def update_category(
     id: str,
     UpdateMainCategoryRequest: UpdateMainCategoryRequest,
     user_id: str = Depends(get_current_user),
@@ -69,18 +69,16 @@ async def update_main_category(
     게시글의 메인 카테고리 수정 API
     """
     user_id = str(user_id)
-    await put_main_category(
-        id=id, title=UpdateMainCategoryRequest.title, user_id=user_id
-    )
+    await put_category(id=id, title=UpdateMainCategoryRequest.title, user_id=user_id)
 
     return {"message": "메인 카테고리가 성공적으로 수정되었습니다."}
 
 
-@router.delete("/main-category/{id}")
-async def remove_main_category(id: str, user_id: str = Depends(get_current_user)):
+@router.delete("/category/{id}")
+async def remove_category(id: str, user_id: str = Depends(get_current_user)):
     """
     게시글의 메인 카테고리 삭제 API
     """
     user_id = str(user_id)
-    await delete_main_category(id=id, user_id=user_id)
+    await delete_category(id=id, user_id=user_id)
     return {"message": "메인 카테고리가 성공적으로 삭제되었습니다."}

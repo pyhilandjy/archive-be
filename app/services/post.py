@@ -4,8 +4,8 @@ from app.db.post_query import (
     POST_MAIN_CATEGORY,
     GET_CATEGORIES,
     POST_SUB_CATEGORY,
-    UPDATE_MAIN_CATEGORY,
-    DELETE_MAIN_CATEGORY,
+    UPDATE_CATEGORY,
+    DELETE_CATEGORY,
     GET_CATEGORIY_BY_ID,
 )
 
@@ -65,13 +65,13 @@ async def get_categories(user_id):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-async def put_main_category(id: str, title: str, user_id: str):
+async def put_category(id: str, title: str, user_id: str):
     """
     게시글의 메인 카테고리 수정
     """
     try:
         execute_insert_update_query(
-            query=UPDATE_MAIN_CATEGORY,
+            query=UPDATE_CATEGORY,
             params={"id": id, "title": title, "user_id": user_id},
         )
         return {"message": "메인 카테고리가 성공적으로 수정되었습니다."}
@@ -79,13 +79,13 @@ async def put_main_category(id: str, title: str, user_id: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-async def delete_main_category(id: str, user_id: str):
+async def delete_category(id: str, user_id: str):
     """
     게시글의 메인 카테고리 삭제
     """
     try:
         execute_insert_update_query(
-            query=DELETE_MAIN_CATEGORY,
+            query=DELETE_CATEGORY,
             params={"id": id, "user_id": user_id},
         )
         return {"message": "메인 카테고리가 성공적으로 삭제되었습니다."}
