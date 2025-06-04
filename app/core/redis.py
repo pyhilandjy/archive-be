@@ -5,6 +5,5 @@ from app.core.config import settings
 rdb = redis.Redis(
     host=settings.redis_host,
     port=settings.redis_port,
-    db=0,
     decode_responses=True,  # 문자열 자동 디코딩
 )
