@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import redis
-from app.router import signup, login
+from app.router import signup, login, post
 
 app = FastAPI()
 r = redis.Redis(host="localhost", port=6379, decode_responses=True)
@@ -18,6 +18,7 @@ app.add_middleware(
 
 app.include_router(signup.router, tags=["sign"])
 app.include_router(login.router, tags=["login"])
+app.include_router(post.router, tags=["post"])
 
 
 @app.get("/")
