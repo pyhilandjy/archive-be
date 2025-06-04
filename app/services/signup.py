@@ -7,10 +7,7 @@ from app.db.query import INSERT_USER_SIGN, CHECK_EMAIL_EXISTS
 from email.message import EmailMessage
 import aiosmtplib
 from app.core.config import settings
-
-
-# Redis 연결
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+from app.core.redis import rdb
 
 # 비밀번호 해시 컨텍스트
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -42,7 +39,7 @@ async def user_signup(email: str, password: str):
     """
     회원가입 API - 이메일 인증된 사용자만 가입 가능
     """
-    verified = r.get(f"verified:{email}")
+    verified = rdb.get(f"verified:{email}")
     if verified != "true":
         raise HTTPException(
             status_code=400, detail=[{"msg": "이메일 인증이 완료되지 않았습니다."}]
@@ -61,7 +58,7 @@ async def user_signup(email: str, password: str):
         )
 
         # 인증 상태 키 삭제 (1회성 보안)
-        r.delete(f"verified:{email}")
+        rdb.delete(f"verified:{email}")
         return {"user_id": user_id}
 
     except Exception as e:
@@ -77,15 +74,15 @@ async def user_verify_request(email: str):
         raise HTTPException(
             status_code=409, detail=[{"msg": "이미 가입된 이메일입니다."}]
         )
-    if r.get(f"otp_cooldown:{email}"):
+    if rdb.get(f"otp_cooldown:{email}"):
         raise HTTPException(
             status_code=429, detail=[{"msg": "잠시 후 다시 시도해주세요."}]
         )
 
     otp = generate_otp()
 
-    r.setex(f"otp:{email}", 300, otp)  # 5분 유효
-    r.setex(f"otp_cooldown:{email}", 10, "1")  # 30초 쿨다운
+    rdb.setex(f"otp:{email}", 300, otp)  # 5분 유효
+    rdb.setex(f"otp_cooldown:{email}", 10, "1")  # 30초 쿨다운
 
     # 이메일 전송
     await send_email_otp(email, otp)
@@ -96,7 +93,7 @@ async def user_verify(email: str, otp: str):
     이메일 인증 검증 API - 사용자가 입력한 OTP가 일치하는지 확인
     """
 
-    stored_otp = r.get(f"otp:{email}")
+    stored_otp = rdb.get(f"otp:{email}")
     if not stored_otp:
         raise HTTPException(
             status_code=400, detail=[{"msg": "OTP가 존재하지 않거나 만료되었습니다."}]
@@ -108,7 +105,7 @@ async def user_verify(email: str, otp: str):
         )
 
     # 검증 성공 처리
-    r.delete(f"otp:{email}")  # OTP 재사용 방지
-    r.setex(f"verified:{email}", 600, "true")  # 가입 가능 상태 표시 (10분 유효)
+    rdb.delete(f"otp:{email}")  # OTP 재사용 방지
+    rdb.setex(f"verified:{email}", 600, "true")  # 가입 가능 상태 표시 (10분 유효)
 
     return {"message": "이메일 인증이 완료되었습니다."}
