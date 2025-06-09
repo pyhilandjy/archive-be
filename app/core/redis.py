@@ -1,9 +1,9 @@
 import redis.asyncio as redis
 from app.core.config import settings
 
-# Redis 비동기 클라이언트
 rdb = redis.Redis(
     host=settings.redis_host,
     port=settings.redis_port,
-    decode_responses=True,  # 문자열 자동 디코딩
+    password=settings.redis_password,
+    decode_responses=True,
 )
