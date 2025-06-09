@@ -166,3 +166,4 @@ cython_debug/
 redis.conf
 /appendonlydir
 /node_modules
+dump.rdb

@@ -1,27 +1,22 @@
-version: "3.9"
-
 services:
-  backend:
+  fastapi:
     build: .
-    container_name: archive-backend
+    container_name: archive_fastapi
     ports:
       - "2456:2456"
+    env_file:
+      - .env
     depends_on:
       - redis
-    environment:
-      - REDIS_URL=redis://redis:6379
-    volumes:
-      - .:/app
-    restart: always
 
   redis:
     image: redis:7
-    container_name: archive-redis
-    ports:
-      - "6379:6379"
+    container_name: archive_redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
-    restart: always
 
 volumes:
   redis_data:
