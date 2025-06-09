@@ -24,18 +24,19 @@ jobs:
 
       - name: Remote Build & Create .env
         run: |
-          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          cd ~/archive_be
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} '
+            cd ~/archive_be
 
-          echo "POSTGRESQL_URL=${{ secrets.POSTGRESQL_URL }}" > .env
-          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
-          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
-          echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> .env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
-          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-          echo "SESSION_EXPIRE_SECONDS=${{ secrets.SESSION_EXPIRE_SECONDS }}" >> .env
+            echo "POSTGRESQL_URL=${{ secrets.POSTGRESQL_URL }}" > .env
+            echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+            echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+            echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> .env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+            echo "SESSION_EXPIRE_SECONDS=${{ secrets.SESSION_EXPIRE_SECONDS }}" >> .env
 
-          docker compose down
-          docker compose up -d --build
-          EOF
+            docker compose down
+            docker compose up -d --build
+          '
+
