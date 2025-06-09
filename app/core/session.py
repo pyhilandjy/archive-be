@@ -3,7 +3,7 @@ from fastapi import Request, Response, HTTPException
 from uuid import UUID
 from app.core.redis import rdb
 
-SESSION_EXPIRE_SECONDS = 60 * 30  # 30분
+SESSION_EXPIRE_SECONDS = 60 * 30
 
 
 def generate_session_id() -> str:
@@ -19,8 +19,8 @@ async def create_session(user_id: str, response: Response):
         session_id,
         httponly=True,
         max_age=SESSION_EXPIRE_SECONDS,
-        samesite="lax",
-        secure=False,
+        samesite="None",
+        secure=True,
     )
 
     print(response.headers.get("set-cookie"))
