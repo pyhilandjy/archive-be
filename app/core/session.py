@@ -13,9 +13,16 @@ def generate_session_id() -> str:
 async def create_session(user_id: str, response: Response):
     session_id = generate_session_id()
     await rdb.setex(session_id, SESSION_EXPIRE_SECONDS, user_id)
+
     response.set_cookie(
-        "session_id", session_id, httponly=True, max_age=SESSION_EXPIRE_SECONDS
+        "session_id",
+        session_id,
+        httponly=True,
+        max_age=SESSION_EXPIRE_SECONDS,
+        samesite="lax",
+        secure=False,
     )
+
     print(response.headers.get("set-cookie"))
 
 
