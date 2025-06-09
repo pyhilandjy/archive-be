@@ -6,13 +6,11 @@ RUN apt-get update && apt-get install -y gcc libpq-dev
 
 RUN pip install --no-cache-dir poetry
 
-COPY pyproject.toml poetry.lock ./
+COPY . .
+
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-COPY . .
-
 EXPOSE 2456
 
-# 실행
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "2456"]
