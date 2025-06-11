@@ -1,7 +1,7 @@
 from app.core.config import settings
 from fastapi import HTTPException
 from app.db.worker import execute_select_query
-from app.db.query import USER_LOGIN_DATA, USER_EMAIL
+from app.db.auth_query import USER_LOGIN_DATA, USER_EMAIL
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -1,9 +1,8 @@
 import random
-import redis
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.db.worker import execute_insert_update_query, execute_select_query
-from app.db.query import INSERT_USER_SIGN, CHECK_EMAIL_EXISTS
+from app.db.auth_query import INSERT_USER_SIGN, CHECK_EMAIL_EXISTS
 from email.message import EmailMessage
 import aiosmtplib
 from app.core.config import settings
