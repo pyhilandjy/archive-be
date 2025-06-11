@@ -1,10 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.redis import rdb
-from app.router import signup, login, post
+from app.router import category, signup, login, contents_list
 
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,7 +14,8 @@ app.add_middleware(
 
 app.include_router(signup.router, tags=["sign"])
 app.include_router(login.router, tags=["login"])
-app.include_router(post.router, tags=["post"])
+app.include_router(category.router, tags=["category"])
+app.include_router(contents_list.router, tags=["contents_list"])
 
 
 @app.get("/")
