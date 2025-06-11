@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.db.worker import execute_select_query
-from app.db.contents_list import GET_CONTENTES_LIST
+from app.db.contents_list import GET_CONTENTES_LIST, GET_CATEGORY_CONTENTES_LIST
 
 
 async def get_users_contents_list(user_id: str):
@@ -25,7 +25,7 @@ async def get_users_category_contents_list(user_id: str, category_id: str):
     """
     try:
         contents = execute_select_query(
-            query=GET_CONTENTES_LIST,
+            query=GET_CATEGORY_CONTENTES_LIST,
             params={"user_id": user_id, "category_id": category_id},
         )
         return contents
