@@ -2,7 +2,10 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y gcc libpq-dev
+RUN apt-get update && apt-get install -y gcc libpq-dev wget ffmpeg curl && apt-get clean
+
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+    && chmod +x /usr/local/bin/yt-dlp
 
 RUN pip install --no-cache-dir poetry
 
