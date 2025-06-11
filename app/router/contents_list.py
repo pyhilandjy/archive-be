@@ -9,7 +9,7 @@ from app.services.contents_list import (
 router = APIRouter()
 
 
-@router.get("/contents-list/{category_id}")
+@router.get("/contents-list/categoty/{category_id}")
 async def get_category_contents_list(
     category_id: str, user_id: str = Depends(get_current_user)
 ):
