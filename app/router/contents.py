@@ -17,7 +17,7 @@ class PostRequest(BaseModel):
     category_id: str
 
 
-@router.post("/posts")
+@router.post("/contents")
 async def create_post(request: PostRequest, user_id: str = Depends(get_current_user)):
     """
     게시물 업로드 API
@@ -43,8 +43,6 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
 
         return {
             "contents_id": contents_id,
-            "video_url": paths["video_path"],
-            "thumbnail_url": paths["thumbnail_path"],
         }
 
     except Exception as e:
