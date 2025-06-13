@@ -1,12 +1,12 @@
 from app.services.post import (
     download_youtube_video,
-    upload_to_supabase_and_cleanup,
+    get_storage_paths,
     insert_post_to_db,
     update_video_path,
 )
+from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -14,32 +14,32 @@ router = APIRouter()
 class PostRequest(BaseModel):
     title: str
     url: str
-    user_id: str
     category_id: str
 
 
 @router.post("/posts")
-async def create_post(request: PostRequest):
+async def create_post(request: PostRequest, user_id: str = Depends(get_current_user)):
     """
     게시물 업로드 API
     """
     try:
-        # title, user_id, category_id를 사용하여 post 테이블에 데이터 삽입
+        # Step 1: post 삽입
         post_id = await insert_post_to_db(
             title=request.title,
-            user_id=request.user_id,
+            user_id=user_id,
             category_id=request.category_id,
         )
 
-        # YouTube 동영상 다운로드
-        output_file = f"{post_id}.mp4"
-        await download_youtube_video(request.url, output_file)
+        # Step 2: 경로 계산 및 yt-dlp 다운로드
+        paths = get_storage_paths(str(user_id), request.category_id, post_id)
+        download_success = download_youtube_video(request.url, paths["base"])
+        if not download_success:
+            raise Exception("영상 다운로드 실패")
 
-        # Supabase 스토리지 업로드 및 스트리밍 URL 생성
-        streaming_url = await upload_to_supabase_and_cleanup(output_file)
+        # Step 3: post에 경로 업데이트
+        await update_video_path(post_id, paths["video_path"], paths["thumbnail_path"])
 
-        # post 테이블에 streaming_url 삽입
-        update_video_path(post_id, streaming_url)
+        return {"post_id": post_id, "video_url": paths["url_path"]}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

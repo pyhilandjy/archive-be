@@ -13,7 +13,6 @@ UPDATE_VIDEO_PATH = text(
     """
     UPDATE post
     SET video_path = :video_path
-    WHERE id = :post_id
-    RETURNING id;
+    WHERE id = :post_id;
     """
 )

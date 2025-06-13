@@ -1,17 +1,30 @@
 import subprocess
+import os
 from app.db.worker import execute_insert_update_query
 from app.db.post import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
-import os
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
+STORAGE_ROOT = "/app/video_storage"
 
 
-def download_youtube_video(youtube_url: str, output_file: str):
+def get_storage_paths(user_id: str, category_id: str, post_id: str) -> dict:
     """
-    yt-dlp로 YouTube 동영상을 mp4 형식으로 다운로드하고 썸네일도 함께 추출합니다.
+    /video_storage/user_<user_id>/category_<category_id>/<post_id>.mp4
     """
+    user_dir = os.path.join(STORAGE_ROOT, f"user_{user_id}", f"category_{category_id}")
+    os.makedirs(user_dir, exist_ok=True)
+
+    base_path = os.path.join(user_dir, post_id)
+    return {
+        "video_path": base_path + ".mp4",
+        "thumbnail_path": base_path + ".jpg",
+        "base": base_path,
+        "url_path": f"/videos/user_{user_id}/category_{category_id}/{post_id}.mp4",
+    }
+
+
+def download_youtube_video(youtube_url: str, output_base: str) -> bool:
     try:
-        output_base = os.path.splitext(output_file)[0]
         command = [
             yt_dlp_path,
             "-f",
@@ -24,28 +37,15 @@ def download_youtube_video(youtube_url: str, output_file: str):
             youtube_url,
         ]
         subprocess.run(command, check=True)
-        return "success"
+        return True
     except subprocess.CalledProcessError as e:
         print("❌ yt-dlp 실행 실패")
         print("STDOUT:\n", e.stdout)
         print("STDERR:\n", e.stderr)
-        return None
+        return False
 
 
-async def upload_to_supabase_and_cleanup(local_file: str):
-    """
-    Supabase 스토리지에 파일을 업로드하고 스트리밍 URL을 반환합니다.
-    """
-    try:
-        filename = os.path.basename(local_file)
-    except Exception as e:
-        print(f"예외 발생: {e}")
-
-
-async def insert_post_to_db(title: str, user_id: str, category_id: str):
-    """
-    post 테이블에 데이터를 삽입하고 삽입된 ID를 반환합니다.
-    """
+async def insert_post_to_db(title: str, user_id: str, category_id: str) -> str:
     params = {
         "title": title,
         "user_id": user_id,
@@ -55,12 +55,14 @@ async def insert_post_to_db(title: str, user_id: str, category_id: str):
     return str(post_id)
 
 
-async def update_video_path(post_id: str, video_path: str):
-    """
-    post 테이블에 비디오 경로를 삽입합니다.
-    """
-    params = {
-        "post_id": post_id,
-        "video_path": video_path,
-    }
-    return execute_insert_update_query(UPDATE_VIDEO_PATH, params, return_id=True)
+async def update_video_path(post_id: str, video_path: str, thumbnail_path: str):
+    try:
+        params = {
+            "post_id": post_id,
+            "video_path": video_path,
+            "thumbnail_path": thumbnail_path,
+        }
+        execute_insert_update_query(UPDATE_VIDEO_PATH, params)
+    except Exception as e:
+        print("❌ 비디오 경로 업데이트 실패:", e)
+        raise e
