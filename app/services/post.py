@@ -1,10 +1,12 @@
 import subprocess
 import os
+from app.core.config import settings
 from app.db.worker import execute_insert_update_query
 from app.db.post import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
 STORAGE_ROOT = "/app/video_storage"
+be_url = settings.be_url
 
 
 def get_storage_paths(user_id: str, category_id: str, post_id: str) -> dict:
@@ -15,8 +17,8 @@ def get_storage_paths(user_id: str, category_id: str, post_id: str) -> dict:
     base_path = os.path.join(user_dir, filename)
 
     return {
-        "video_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
-        "thumbnail_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
+        "video_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
+        "thumbnail_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
         "base": base_path,  # 실제 로컬 경로 (yt-dlp용)
     }
 

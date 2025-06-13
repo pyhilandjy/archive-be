@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     redis_port: int
     session_expire_seconds: int
     redis_password: str
+    be_url: str
     model_config = SettingsConfigDict(env_file=".env")
 
 
