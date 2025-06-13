@@ -8,18 +8,16 @@ STORAGE_ROOT = "/app/video_storage"
 
 
 def get_storage_paths(user_id: str, category_id: str, post_id: str) -> dict:
-    """
-    /video_storage/user_<user_id>/category_<category_id>/<post_id>.mp4
-    """
     user_dir = os.path.join(STORAGE_ROOT, f"user_{user_id}", f"category_{category_id}")
     os.makedirs(user_dir, exist_ok=True)
 
-    base_path = os.path.join(user_dir, post_id)
+    filename = f"{post_id}"
+    base_path = os.path.join(user_dir, filename)
+
     return {
-        "video_path": base_path + ".mp4",
-        "thumbnail_path": base_path + ".jpg",
-        "base": base_path,
-        "url_path": f"/videos/user_{user_id}/category_{category_id}/{post_id}.mp4",
+        "video_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
+        "thumbnail_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
+        "base": base_path,  # 실제 로컬 경로 (yt-dlp용)
     }
 
 

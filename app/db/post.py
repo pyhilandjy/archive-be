@@ -2,8 +2,8 @@ from sqlalchemy import text
 
 INSERT_POST_TITLE = text(
     """
-    INSERT INTO post (title, user_id, category_id)
-    VALUES (:title, :user_id, :category_id)
+    INSERT INTO post (title, user_id, category_id, thumbnail_path)
+    VALUES (:title, :user_id, :category_id, :thumbnail_path)
     RETURNING id;
     """
 )
