@@ -1,4 +1,4 @@
-from app.services.post import (
+from app.services.contents import (
     download_youtube_video,
     get_storage_paths,
     insert_post_to_db,

@@ -2,7 +2,7 @@ import subprocess
 import os
 from app.core.config import settings
 from app.db.worker import execute_insert_update_query
-from app.db.post import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
+from app.db.contents import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
 STORAGE_ROOT = "/app/video_storage"
