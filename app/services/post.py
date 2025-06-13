@@ -1,7 +1,6 @@
 import subprocess
 from app.db.worker import execute_insert_update_query
 from app.db.post import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
-from supabase import Client, create_client
 import os
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
