@@ -9,17 +9,17 @@ STORAGE_ROOT = "/app/video_storage"
 be_url = settings.be_url
 
 
-def get_storage_paths(user_id: str, category_id: str, post_id: str) -> dict:
+def get_storage_paths(user_id: str, category_id: str, contents_id: str) -> dict:
     user_dir = os.path.join(STORAGE_ROOT, f"user_{user_id}", f"category_{category_id}")
     os.makedirs(user_dir, exist_ok=True)
 
-    filename = f"{post_id}"
+    filename = f"{contents_id}"
     base_path = os.path.join(user_dir, filename)
 
     return {
         "video_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
         "thumbnail_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
-        "base": base_path,  # 실제 로컬 경로 (yt-dlp용)
+        "base": base_path,
     }
 
 
@@ -51,14 +51,14 @@ async def insert_post_to_db(title: str, user_id: str, category_id: str) -> str:
         "user_id": user_id,
         "category_id": category_id,
     }
-    post_id = execute_insert_update_query(INSERT_POST_TITLE, params, return_id=True)
-    return str(post_id)
+    contents_id = execute_insert_update_query(INSERT_POST_TITLE, params, return_id=True)
+    return str(contents_id)
 
 
-async def update_video_path(post_id: str, video_path: str, thumbnail_path: str):
+async def update_video_path(contents_id: str, video_path: str, thumbnail_path: str):
     try:
         params = {
-            "post_id": post_id,
+            "contents_id": contents_id,
             "video_path": video_path,
             "thumbnail_path": thumbnail_path,
         }
