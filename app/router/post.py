@@ -39,7 +39,11 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
         # Step 3: post에 경로 업데이트
         await update_video_path(post_id, paths["video_path"], paths["thumbnail_path"])
 
-        return {"post_id": post_id, "video_url": paths["url_path"]}
+        return {
+            "post_id": post_id,
+            "video_url": paths["video_path"],
+            "thumbnail_url": paths["thumbnail_path"],
+        }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
