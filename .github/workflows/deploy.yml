@@ -40,6 +40,7 @@ jobs:
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
           echo "SESSION_EXPIRE_SECONDS=${{ secrets.SESSION_EXPIRE_SECONDS }}" >> .env
+          echo "BE_URL=${{ secrets.BE_URL }}" >> .env
 
           docker compose down
           docker compose up -d --build
