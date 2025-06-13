@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.router import category, signup, login, contents_list, post
 
 app = FastAPI()
@@ -11,6 +12,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/videos", StaticFiles(directory="/app/video_storage"), name="videos")
 
 app.include_router(signup.router, tags=["sign"])
 app.include_router(login.router, tags=["login"])
