@@ -2,8 +2,8 @@ from sqlalchemy import text
 
 INSERT_POST_TITLE = text(
     """
-    INSERT INTO post (title, user_id, category_id, thumbnail_path)
-    VALUES (:title, :user_id, :category_id, :thumbnail_path)
+    INSERT INTO post (title, user_id, category_id)
+    VALUES (:title, :user_id, :category_id)
     RETURNING id;
     """
 )
@@ -12,7 +12,7 @@ INSERT_POST_TITLE = text(
 UPDATE_VIDEO_PATH = text(
     """
     UPDATE post
-    SET video_path = :video_path
+    SET video_path = :video_path, thumbnail_path = :thumbnail_path
     WHERE id = :post_id;
     """
 )
