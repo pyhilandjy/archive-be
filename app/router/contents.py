@@ -3,6 +3,8 @@ from app.services.contents import (
     get_storage_paths,
     insert_post_to_db,
     update_video_path,
+    get_contents_by_id,
+    update_contents_description,
 )
 from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
@@ -15,6 +17,34 @@ class PostRequest(BaseModel):
     title: str
     url: str
     category_id: str
+
+
+class UpdateDescriptionRequest(BaseModel):
+    description: str
+
+
+@router.get("/contents/{contents_id}")
+async def get_post(contents_id: str):
+    """
+    게시물 조회 API(title, description, video_path, thumbnail_path)
+    """
+    try:
+        contents = await get_contents_by_id(contents_id)
+        return contents
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/contents/{contents_id}/description")
+async def update_post_description(contents_id: str, request: UpdateDescriptionRequest):
+    """
+    게시물 설명 업데이트 API
+    """
+    try:
+        await update_contents_description(contents_id, request.description)
+        return {"message": "게시물 설명이 성공적으로 업데이트되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/contents")

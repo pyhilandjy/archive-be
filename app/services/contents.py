@@ -2,7 +2,12 @@ import subprocess
 import os
 from app.core.config import settings
 from app.db.worker import execute_insert_update_query
-from app.db.contents import INSERT_POST_TITLE, UPDATE_VIDEO_PATH
+from app.db.contents import (
+    INSERT_POST_TITLE,
+    UPDATE_VIDEO_PATH,
+    SELECT_CONTENTS_BY_ID,
+    UPDATE_CONTENTS_DESCRIPTION,
+)
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
 STORAGE_ROOT = "/app/video_storage"
@@ -65,4 +70,34 @@ async def update_video_path(contents_id: str, video_path: str, thumbnail_path: s
         execute_insert_update_query(UPDATE_VIDEO_PATH, params)
     except Exception as e:
         print("❌ 비디오 경로 업데이트 실패:", e)
+        raise e
+
+
+async def get_contents_by_id(contents_id: str):
+    """
+    게시글 ID로 게시글 조회
+    """
+    try:
+        contents = execute_insert_update_query(
+            query=SELECT_CONTENTS_BY_ID,
+            params={"contents_id": contents_id},
+        )
+        return contents
+    except Exception as e:
+        print("❌ 게시글 조회 실패:", e)
+        raise e
+
+
+async def update_contents_description(contents_id: str, description: str):
+    """
+    게시글 설명 업데이트
+    """
+    try:
+        params = {
+            "contents_id": contents_id,
+            "description": description,
+        }
+        execute_insert_update_query(query=UPDATE_CONTENTS_DESCRIPTION, params=params)
+    except Exception as e:
+        print("❌ 게시글 설명 업데이트 실패:", e)
         raise e

@@ -16,3 +16,17 @@ UPDATE_VIDEO_PATH = text(
     WHERE id = :contents_id;
     """
 )
+
+SELECT_CONTENTS_BY_ID = text(
+    """
+    SELECT title, video_path, thumbnail_path, description FROM contents
+    WHERE id = :contents_id;
+    """
+)
+UPDATE_CONTENTS_DESCRIPTION = text(
+    """
+    UPDATE contents 
+    SET description = :description 
+    WHERE id = :contents_id
+    """
+)
