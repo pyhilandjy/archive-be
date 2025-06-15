@@ -1,7 +1,7 @@
 import subprocess
 import os
 from app.core.config import settings
-from app.db.worker import execute_insert_update_query
+from app.db.worker import execute_insert_update_query, execute_select_query
 from app.db.contents import (
     INSERT_POST_TITLE,
     UPDATE_VIDEO_PATH,
@@ -78,7 +78,7 @@ async def get_contents_by_id(contents_id: str):
     게시글 ID로 게시글 조회
     """
     try:
-        contents = execute_insert_update_query(
+        contents = execute_select_query(
             query=SELECT_CONTENTS_BY_ID,
             params={"contents_id": contents_id},
         )
