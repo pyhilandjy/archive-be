@@ -30,3 +30,10 @@ UPDATE_CONTENTS_DESCRIPTION = text(
     WHERE id = :contents_id
     """
 )
+
+DELETE_CONTENTS = text(
+    """
+    DELETE FROM contents 
+    WHERE id = :contents_id
+    """
+)

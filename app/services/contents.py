@@ -1,5 +1,6 @@
 import subprocess
 import os
+import shutil
 from app.core.config import settings
 from app.db.worker import execute_insert_update_query, execute_select_query
 from app.db.contents import (
@@ -7,6 +8,7 @@ from app.db.contents import (
     UPDATE_VIDEO_PATH,
     SELECT_CONTENTS_BY_ID,
     UPDATE_CONTENTS_DESCRIPTION,
+    DELETE_CONTENTS,
 )
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
@@ -100,4 +102,38 @@ async def update_contents_description(contents_id: str, description: str):
         execute_insert_update_query(query=UPDATE_CONTENTS_DESCRIPTION, params=params)
     except Exception as e:
         print("❌ 게시글 설명 업데이트 실패:", e)
+        raise e
+
+
+async def delete_contents(contents_id: str, user_id: str, category_id: str):
+    """
+    게시글 삭제
+    """
+    try:
+        # Step 1: 데이터베이스에서 게시글 삭제
+        execute_insert_update_query(
+            query=DELETE_CONTENTS, params={"contents_id": contents_id}
+        )
+
+        # Step 2: 파일 시스템에서 관련 파일 삭제
+        storage_paths = get_storage_paths(user_id, category_id, contents_id)
+        base_path = storage_paths["base"]
+
+        # 삭제 대상 파일들
+        video_file = base_path + ".mp4"
+        thumbnail_file = base_path + ".jpg"
+
+        # 파일 삭제
+        if os.path.exists(video_file):
+            os.remove(video_file)
+        if os.path.exists(thumbnail_file):
+            os.remove(thumbnail_file)
+
+        # 디렉토리 정리 (필요 시)
+        user_dir = os.path.dirname(base_path)
+        if os.path.exists(user_dir) and not os.listdir(user_dir):
+            shutil.rmtree(user_dir)
+
+    except Exception as e:
+        print("❌ 게시글 삭제 실패:", e)
         raise e
