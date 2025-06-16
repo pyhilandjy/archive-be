@@ -5,6 +5,8 @@ from app.services.contents import (
     update_video_path,
     get_contents_by_id,
     update_contents_description,
+    delete_contents,
+    get_category_id_contents_by_id,
 )
 from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
@@ -75,5 +77,34 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
             "contents_id": contents_id,
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/contents/{contents_id}")
+async def delete_post(
+    contents_id: str, category_id: str, user_id: str = Depends(get_current_user)
+):
+    """
+    게시물 삭제 API
+    """
+    try:
+        # Step 1: 게시글 삭제
+        await delete_contents(
+            contents_id, user_id, category_id
+        )  # category_id는 None으로 설정
+        return {"message": "게시물이 성공적으로 삭제되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/contents/{contents_id}/category_id")
+async def get_category_id(contents_id: str):
+    """
+    게시글 ID로 카테고리 ID 조회 API
+    """
+    try:
+        category_id = await get_category_id_contents_by_id(contents_id)
+        return str(category_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -26,10 +26,6 @@ async def get_users_category_contents_list(user_id: str, category_id: str):
             query=GET_CATEGORY_CONTENTES_LIST,
             params={"user_id": user_id, "category_id": category_id},
         )
-        if not contents:
-            raise HTTPException(
-                status_code=404, detail="No contents found for this category."
-            )
         return contents
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

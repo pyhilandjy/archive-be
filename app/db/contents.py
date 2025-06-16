@@ -23,6 +23,16 @@ SELECT_CONTENTS_BY_ID = text(
     WHERE id = :contents_id;
     """
 )
+
+
+SELECT_CONTENTS_CATEGORY_BY_ID = text(
+    """
+    SELECT category_id FROM contents
+    WHERE id = :contents_id;
+    """
+)
+
+
 UPDATE_CONTENTS_DESCRIPTION = text(
     """
     UPDATE contents 
