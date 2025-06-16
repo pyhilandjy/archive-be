@@ -12,8 +12,6 @@ async def get_users_contents_list(user_id: str):
             query=GET_CONTENTES_LIST,
             params={"user_id": user_id},
         )
-
-        contents = contents * 30  # 스크롤 테스트용
         return contents
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
