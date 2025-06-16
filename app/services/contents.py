@@ -111,8 +111,9 @@ async def delete_contents(contents_id: str, user_id: str):
     게시글 삭제
     """
     try:
+        user_id = str(user_id)
         category_id = await get_category_id_contents_by_id(contents_id)
-        category_id = str(category_id[0].get("category_id"))
+        category_id = category_id.get("category_id")
         # Step 1: 데이터베이스에서 게시글 삭제
         execute_insert_update_query(
             query=DELETE_CONTENTS, params={"contents_id": contents_id}
