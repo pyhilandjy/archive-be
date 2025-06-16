@@ -94,17 +94,13 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
 
 
 @router.delete("/contents/{contents_id}")
-async def delete_post(
-    contents_id: str, category_id: str, user_id: str = Depends(get_current_user)
-):
+async def delete_post(contents_id: str, user_id: str = Depends(get_current_user)):
     """
     게시물 삭제 API
     """
     try:
         # Step 1: 게시글 삭제
-        await delete_contents(
-            contents_id, user_id, category_id
-        )  # category_id는 None으로 설정
+        await delete_contents(contents_id, user_id)  # category_id는 None으로 설정
         return {"message": "게시물이 성공적으로 삭제되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
