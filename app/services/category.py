@@ -8,6 +8,8 @@ from app.db.category_query import (
     DELETE_CATEGORY,
     GET_CATEGORIY_BY_ID,
 )
+import os
+import shutil
 
 
 async def post_main_category(title: str, user_id: str):
@@ -84,10 +86,19 @@ async def delete_category(id: str, user_id: str):
     게시글의 메인 카테고리 삭제
     """
     try:
+        # Step 1: 데이터베이스에서 카테고리 삭제
         execute_insert_update_query(
             query=DELETE_CATEGORY,
             params={"id": id, "user_id": user_id},
         )
+
+        # Step 2: 파일 시스템에서 관련 디렉토리 삭제
+        category_dir = os.path.join(
+            "/app/video_storage", f"user_{user_id}", f"category_{id}"
+        )
+        if os.path.exists(category_dir):
+            shutil.rmtree(category_dir)
+
         return {"message": "메인 카테고리가 성공적으로 삭제되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
