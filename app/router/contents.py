@@ -25,6 +25,18 @@ class UpdateDescriptionRequest(BaseModel):
     description: str
 
 
+@router.get("/contents/{contents_id}/category_id")
+async def get_category_id(contents_id: str):
+    """
+    게시글 ID로 카테고리 ID 조회 API
+    """
+    try:
+        category_id = await get_category_id_contents_by_id(contents_id)
+        return str(category_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/contents/{contents_id}")
 async def get_post(contents_id: str):
     """
@@ -94,17 +106,5 @@ async def delete_post(
             contents_id, user_id, category_id
         )  # category_id는 None으로 설정
         return {"message": "게시물이 성공적으로 삭제되었습니다."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/contents/{contents_id}/category_id")
-async def get_category_id(contents_id: str):
-    """
-    게시글 ID로 카테고리 ID 조회 API
-    """
-    try:
-        category_id = await get_category_id_contents_by_id(contents_id)
-        return str(category_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
