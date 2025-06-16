@@ -32,7 +32,7 @@ async def get_category_id(contents_id: str):
     """
     try:
         category_id = await get_category_id_contents_by_id(contents_id)
-        return str(category_id)
+        return category_id
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
