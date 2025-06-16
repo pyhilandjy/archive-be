@@ -149,8 +149,7 @@ async def get_category_id_contents_by_id(contents_id: str):
             query=SELECT_CONTENTS_CATEGORY_BY_ID,
             params={"contents_id": contents_id},
         )
-        row = result[0]
-        return {"category_id": str(row["category_id"])}
+        return result[0]
     except Exception as e:
         print("❌ 게시글 조회 실패:", e)
         raise e
