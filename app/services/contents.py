@@ -142,16 +142,15 @@ async def delete_contents(contents_id: str, user_id: str, category_id: str):
 
 async def get_category_id_contents_by_id(contents_id: str):
     """
-    게시글 ID로 게시글 조회
+    게시글 ID로 카테고리 ID 조회
     """
     try:
-        contents = execute_select_query(
+        result = execute_select_query(
             query=SELECT_CONTENTS_CATEGORY_BY_ID,
             params={"contents_id": contents_id},
         )
-        contents = [dict(row) for row in contents]
-        contents[0]["category_id"] = str(contents[0]["category_id"])
-        return contents
+        row = result[0]
+        return {"category_id": str(row["category_id"])}
     except Exception as e:
         print("❌ 게시글 조회 실패:", e)
         raise e
