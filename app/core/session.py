@@ -39,12 +39,12 @@ async def get_current_user(request: Request, response: Response) -> str:
     await rdb.expire(session_id, SESSION_EXPIRE_SECONDS)
 
     response.set_cookie(
-        key="session_id",
-        value=session_id,
-        max_age=SESSION_EXPIRE_SECONDS,
+        "session_id",
+        session_id,
         httponly=True,
-        secure=False,
+        max_age=SESSION_EXPIRE_SECONDS,
         samesite="None",
+        secure=True,
     )
 
     user_id_str = user_id.decode() if isinstance(user_id, bytes) else user_id
