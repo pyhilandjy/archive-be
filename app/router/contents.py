@@ -83,7 +83,7 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
         paths = await get_storage_paths(str(user_id), request.category_id, contents_id)
         download_success = await download_youtube_video(request.url, paths["base"])
         if not download_success:
-            await delete_contents_metadata(contents_id, str(user_id))
+            # await delete_contents_metadata(contents_id, str(user_id))
             raise Exception("영상 다운로드 실패")
 
         # Step 3: post에 경로 업데이트
