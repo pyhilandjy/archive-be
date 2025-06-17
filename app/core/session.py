@@ -44,7 +44,7 @@ async def get_current_user(request: Request, response: Response) -> str:
         max_age=SESSION_EXPIRE_SECONDS,
         httponly=True,
         secure=False,
-        samesite="lax",
+        samesite="None",
     )
 
     user_id_str = user_id.decode() if isinstance(user_id, bytes) else user_id
