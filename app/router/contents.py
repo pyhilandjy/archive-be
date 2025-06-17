@@ -81,15 +81,17 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
 
         # Step 2: 경로 계산 및 yt-dlp 다운로드
         paths = await get_storage_paths(str(user_id), request.category_id, contents_id)
-        download_success = await download_youtube_video(request.url, paths["base"])
-        if not download_success:
-            # await delete_contents_metadata(contents_id, str(user_id))
-            raise Exception("영상 다운로드 실패")
 
         # Step 3: post에 경로 업데이트
         await update_video_path(
             contents_id, paths["video_path"], paths["thumbnail_path"]
         )
+        # Step 4: YouTube 영상 다운로드
+        download_success = await download_youtube_video(request.url, paths["base"])
+
+        if not download_success:
+            await delete_contents_metadata(contents_id, str(user_id))
+            raise Exception("영상 다운로드 실패")
 
         return {
             "contents_id": contents_id,
