@@ -44,9 +44,14 @@ async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
             output_base + ".%(ext)s",
             youtube_url,
         ]
-        subprocess.run(command, check=True)
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        print("✅ yt-dlp stdout:", result.stdout)
+        print("✅ yt-dlp stderr:", result.stderr)
         return True
     except subprocess.CalledProcessError as e:
+        print("❌ yt-dlp failed")
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
         return False
 
 
