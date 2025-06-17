@@ -76,14 +76,14 @@ async def update_video_path(contents_id: str, video_path: str, thumbnail_path: s
         raise e
 
 
-async def get_contents_by_id(contents_id: str):
+async def get_contents_by_id(contents_id: str, user_id: str):
     """
     게시글 ID로 게시글 조회
     """
     try:
         contents = execute_select_query(
             query=SELECT_CONTENTS_BY_ID,
-            params={"contents_id": contents_id},
+            params={"contents_id": contents_id, "user_id": user_id},
         )
         return contents
     except Exception as e:
@@ -91,7 +91,7 @@ async def get_contents_by_id(contents_id: str):
         raise e
 
 
-async def update_contents_description(contents_id: str, description: str):
+async def update_contents_description(contents_id: str, description: str, user_id: str):
     """
     게시글 설명 업데이트
     """
@@ -99,6 +99,7 @@ async def update_contents_description(contents_id: str, description: str):
         params = {
             "contents_id": contents_id,
             "description": description,
+            "user_id": user_id,
         }
         execute_insert_update_query(query=UPDATE_CONTENTS_DESCRIPTION, params=params)
     except Exception as e:
@@ -112,11 +113,12 @@ async def delete_contents(contents_id: str, user_id: str):
     """
     try:
         user_id = str(user_id)
-        category_id = await get_category_id_contents_by_id(contents_id)
+        category_id = await get_category_id_contents_by_id(contents_id, user_id)
         category_id = category_id.get("category_id")
         # Step 1: 데이터베이스에서 게시글 삭제
         execute_insert_update_query(
-            query=DELETE_CONTENTS, params={"contents_id": contents_id}
+            query=DELETE_CONTENTS,
+            params={"contents_id": contents_id, "user_id": user_id},
         )
 
         # Step 2: 파일 시스템에서 관련 파일 삭제
@@ -143,14 +145,14 @@ async def delete_contents(contents_id: str, user_id: str):
         raise e
 
 
-async def get_category_id_contents_by_id(contents_id: str):
+async def get_category_id_contents_by_id(contents_id: str, user_id: str):
     """
     게시글 ID로 카테고리 ID 조회
     """
     try:
         result = execute_select_query(
             query=SELECT_CONTENTS_CATEGORY_BY_ID,
-            params={"contents_id": contents_id},
+            params={"contents_id": contents_id, "user_id": user_id},
         )
         row = result[0]
         return {"category_id": str(row["category_id"])}

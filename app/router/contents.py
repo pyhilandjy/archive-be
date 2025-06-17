@@ -38,12 +38,12 @@ async def get_category_id(contents_id: str):
 
 
 @router.get("/contents/{contents_id}")
-async def get_post(contents_id: str):
+async def get_post(contents_id: str, user_id: str = Depends(get_current_user)):
     """
     게시물 조회 API(title, description, video_path, thumbnail_path)
     """
     try:
-        contents = await get_contents_by_id(contents_id)
+        contents = await get_contents_by_id(contents_id, user_id)
         return contents
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

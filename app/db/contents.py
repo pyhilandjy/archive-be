@@ -20,7 +20,7 @@ UPDATE_VIDEO_PATH = text(
 SELECT_CONTENTS_BY_ID = text(
     """
     SELECT title, video_path, thumbnail_path, description FROM contents
-    WHERE id = :contents_id;
+    WHERE user_id = :user_id and id = :contents_id;
     """
 )
 
@@ -28,7 +28,7 @@ SELECT_CONTENTS_BY_ID = text(
 SELECT_CONTENTS_CATEGORY_BY_ID = text(
     """
     SELECT category_id FROM contents
-    WHERE id = :contents_id;
+    WHERE user_id = :user_id and id = :contents_id;
     """
 )
 
