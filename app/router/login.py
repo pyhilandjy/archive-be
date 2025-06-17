@@ -34,6 +34,6 @@ async def get_me(user_id: str = Depends(get_current_user)):
 async def logout(request: Request, response: Response):
     session_id = request.cookies.get("session_id")
     if session_id:
-        await rdb.delete(f"session:{session_id}")
+        await rdb.delete(session_id)
         response.delete_cookie("session_id")
     return {"message": "logged out"}
