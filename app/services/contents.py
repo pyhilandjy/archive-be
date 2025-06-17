@@ -31,27 +31,38 @@ async def get_storage_paths(user_id: str, category_id: str, contents_id: str) ->
     }
 
 
+import asyncio
+
+
 async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
+    command = [
+        yt_dlp_path,
+        "-f",
+        "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
+        "--write-thumbnail",
+        "--convert-thumbnails",
+        "jpg",
+        "-o",
+        output_base + ".%(ext)s",
+        youtube_url,
+    ]
+
+    loop = asyncio.get_event_loop()
+
     try:
-        command = [
-            yt_dlp_path,
-            "-f",
-            "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
-            "--write-thumbnail",
-            "--convert-thumbnails",
-            "jpg",
-            "-o",
-            output_base + ".%(ext)s",
-            youtube_url,
-        ]
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        print("✅ yt-dlp stdout:", result.stdout)
-        print("✅ yt-dlp stderr:", result.stderr)
+        result = await loop.run_in_executor(
+            None,
+            lambda: subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True,
+            ),
+        )
+        print("stdout:", result.stdout)
         return True
     except subprocess.CalledProcessError as e:
-        print("❌ yt-dlp failed")
-        print("STDOUT:", e.stdout)
-        print("STDERR:", e.stderr)
+        print("stderr:", e.stderr)
         return False
 
 
