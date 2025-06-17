@@ -7,6 +7,7 @@ from app.services.contents import (
     update_contents_description,
     delete_contents,
     get_category_id_contents_by_id,
+    delete_contents_metadata,
 )
 from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
@@ -26,12 +27,12 @@ class UpdateDescriptionRequest(BaseModel):
 
 
 @router.get("/contents/{contents_id}/category_id")
-async def get_category_id(contents_id: str):
+async def get_category_id(contents_id: str, user_id: str = Depends(get_current_user)):
     """
     게시글 ID로 카테고리 ID 조회 API
     """
     try:
-        category_id = await get_category_id_contents_by_id(contents_id)
+        category_id = await get_category_id_contents_by_id(contents_id, user_id)
         return category_id
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -50,12 +51,16 @@ async def get_post(contents_id: str, user_id: str = Depends(get_current_user)):
 
 
 @router.put("/contents/{contents_id}/description")
-async def update_post_description(contents_id: str, request: UpdateDescriptionRequest):
+async def update_post_description(
+    contents_id: str,
+    request: UpdateDescriptionRequest,
+    user_id: str = Depends(get_current_user),
+):
     """
     게시물 설명 업데이트 API
     """
     try:
-        await update_contents_description(contents_id, request.description)
+        await update_contents_description(contents_id, request.description, user_id)
         return {"message": "게시물 설명이 성공적으로 업데이트되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -75,9 +80,10 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
         )
 
         # Step 2: 경로 계산 및 yt-dlp 다운로드
-        paths = get_storage_paths(str(user_id), request.category_id, contents_id)
-        download_success = download_youtube_video(request.url, paths["base"])
+        paths = await get_storage_paths(str(user_id), request.category_id, contents_id)
+        download_success = await download_youtube_video(request.url, paths["base"])
         if not download_success:
+            await delete_contents_metadata(contents_id, str(user_id))
             raise Exception("영상 다운로드 실패")
 
         # Step 3: post에 경로 업데이트

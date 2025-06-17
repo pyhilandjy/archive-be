@@ -17,7 +17,7 @@ STORAGE_ROOT = "/app/video_storage"
 be_url = settings.be_url
 
 
-def get_storage_paths(user_id: str, category_id: str, contents_id: str) -> dict:
+async def get_storage_paths(user_id: str, category_id: str, contents_id: str) -> dict:
     user_dir = os.path.join(STORAGE_ROOT, f"user_{user_id}", f"category_{category_id}")
     os.makedirs(user_dir, exist_ok=True)
 
@@ -31,7 +31,7 @@ def get_storage_paths(user_id: str, category_id: str, contents_id: str) -> dict:
     }
 
 
-def download_youtube_video(youtube_url: str, output_base: str) -> bool:
+async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
     try:
         command = [
             yt_dlp_path,
@@ -47,10 +47,19 @@ def download_youtube_video(youtube_url: str, output_base: str) -> bool:
         subprocess.run(command, check=True)
         return True
     except subprocess.CalledProcessError as e:
-        print("❌ yt-dlp 실행 실패")
-        print("STDOUT:\n", e.stdout)
-        print("STDERR:\n", e.stderr)
         return False
+
+
+async def delete_contents_metadata(contents_id: str, user_id: str):
+    """
+    게시글 메타데이터 삭제
+    """
+    try:
+        params = {"contents_id": contents_id, "user_id": user_id}
+        execute_insert_update_query(query=DELETE_CONTENTS, params=params)
+    except Exception as e:
+        print("❌ 게시글 메타데이터 삭제 실패:", e)
+        raise e
 
 
 async def insert_post_to_db(title: str, user_id: str, category_id: str) -> str:
@@ -122,7 +131,7 @@ async def delete_contents(contents_id: str, user_id: str):
         )
 
         # Step 2: 파일 시스템에서 관련 파일 삭제
-        storage_paths = get_storage_paths(user_id, category_id, contents_id)
+        storage_paths = await get_storage_paths(user_id, category_id, contents_id)
         base_path = storage_paths["base"]
 
         # 삭제 대상 파일들
