@@ -2,8 +2,9 @@ import uuid
 from fastapi import Request, Response, HTTPException
 from uuid import UUID
 from app.core.redis import rdb
+from app.core.config import settings
 
-SESSION_EXPIRE_SECONDS = 60 * 30
+SESSION_EXPIRE_SECONDS = settings.session_expire_seconds
 
 
 def generate_session_id() -> str:
