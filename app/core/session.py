@@ -27,18 +27,26 @@ async def create_session(user_id: str, response: Response):
     print(response.headers.get("set-cookie"))
 
 
-async def get_current_user(request: Request) -> str:
+async def get_current_user(request: Request, response: Response) -> str:
     session_id = request.cookies.get("session_id")
     if not session_id:
-        raise HTTPException(status_code=401, detail=[{"msg": "로그인이 필요합니다."}])
+        raise HTTPException(status_code=401)
 
     user_id = await rdb.get(session_id)
     if not user_id:
-        raise HTTPException(
-            status_code=401, detail=[{"msg": "세션이 만료되었거나 존재하지 않습니다."}]
-        )
+        raise HTTPException(status_code=401)
 
-    await rdb.expire(session_id, SESSION_EXPIRE_SECONDS)  # 세션 연장
+    await rdb.expire(session_id, SESSION_EXPIRE_SECONDS)
+
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        max_age=SESSION_EXPIRE_SECONDS,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+    )
+
     user_id_str = user_id.decode() if isinstance(user_id, bytes) else user_id
     return UUID(user_id_str)
 
