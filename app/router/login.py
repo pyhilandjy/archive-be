@@ -35,5 +35,11 @@ async def logout(request: Request, response: Response):
     session_id = request.cookies.get("session_id")
     if session_id:
         await rdb.delete(session_id)
-        response.delete_cookie("session_id")
+
+        response.delete_cookie(
+            key="session_id",
+            samesite="None",
+            secure=True,
+        )
+
     return {"message": "logged out"}
