@@ -1,7 +1,12 @@
 from app.core.config import settings
 from fastapi import HTTPException
-from app.db.worker import execute_select_query
-from app.db.auth_query import USER_LOGIN_DATA, USER_EMAIL, CHECK_EMAIL_EXISTS
+from app.db.worker import execute_select_query, execute_insert_update_query
+from app.db.auth_query import (
+    USER_LOGIN_DATA,
+    USER_EMAIL,
+    CHECK_EMAIL_EXISTS,
+    UPDATE_USER_PASSWORD,
+)
 from passlib.context import CryptContext
 from app.core.redis import rdb
 
@@ -61,15 +66,15 @@ async def reset_password(email: str, new_password: str):
     """
     비밀번호 재설정 함수
     """
-    verified = rdb.get(f"verified:{email}")
+    verified = await rdb.get(f"verified:{email}")
     if verified != "true":
         raise HTTPException(
             status_code=400, detail=[{"msg": "이메일 인증이 완료되지 않았습니다."}]
         )
     password_hash = pwd_context.hash(new_password)
-    execute_select_query(
-        "UPDATE users SET password_hash = :password_hash WHERE email = :email",
+    execute_insert_update_query(
+        query=UPDATE_USER_PASSWORD,
         params={"password_hash": password_hash, "email": email},
     )
     # 인증 상태 키 삭제 (1회성 보안)
-    rdb.delete(f"verified:{email}")
+    await rdb.delete(f"verified:{email}")

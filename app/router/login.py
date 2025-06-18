@@ -8,6 +8,7 @@ from app.services.login import (
 )
 from app.core.session import create_session, get_current_user
 from app.core.redis import rdb
+from fastapi.responses import JSONResponse
 
 
 class LoginRequest(BaseModel):
@@ -69,4 +70,4 @@ async def reset_password_endpoint(ResetPasswordRequest: ResetPasswordRequest):
     비밀번호 재설정 API
     """
     await reset_password(ResetPasswordRequest.email, ResetPasswordRequest.new_password)
-    return {"msg": "비밀번호가 성공적으로 재설정되었습니다."}
+    return JSONResponse(content={"success": True})

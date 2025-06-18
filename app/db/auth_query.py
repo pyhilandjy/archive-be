@@ -26,3 +26,9 @@ USER_EMAIL = text(
     SELECT email FROM users WHERE id = :user_id
     """
 )
+
+UPDATE_USER_PASSWORD = text(
+    """
+    UPDATE users SET password_hash = :password_hash WHERE email = :email
+    """
+)
