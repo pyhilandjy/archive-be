@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
 from app.services.signup import user_signup, user_verify_request, user_verify
 import redis
 import re
