@@ -32,6 +32,7 @@ async def signup(request: SignupRequest):
 
 class VerifyRequest(BaseModel):
     email: EmailStr
+    mode: str = "signup"
 
 
 @router.post("/verify/request")
@@ -39,7 +40,7 @@ async def verify_request(request: VerifyRequest):
     """
     이메일 인증 요청 API
     """
-    await user_verify_request(email=request.email)
+    await user_verify_request(email=request.email, mode=request.mode)
     return JSONResponse(content={"success": True})  # 성공 여부 반환
 
 
