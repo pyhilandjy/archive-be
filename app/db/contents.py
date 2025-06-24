@@ -37,13 +37,13 @@ UPDATE_CONTENTS_DESCRIPTION = text(
     """
     UPDATE contents 
     SET description = :description 
-    WHERE id = :contents_id
+    WHERE id = :contents_id and user_id = :user_id
     """
 )
 
 DELETE_CONTENTS = text(
     """
     DELETE FROM contents 
-    WHERE id = :contents_id
+    WHERE id = :contents_id and user_id = :user_id
     """
 )
