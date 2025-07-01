@@ -2,7 +2,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from app.services.websocket_manager import websocket_manager
 from fastapi.staticfiles import StaticFiles
-from app.router import category, contents, signup, login, contents_list
+from app.router import (
+    category,
+    contents,
+    signup,
+    login,
+    contents_list,
+)
 from app.services.contents import download_worker
 import asyncio
 
