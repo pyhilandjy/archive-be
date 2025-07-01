@@ -1,5 +1,4 @@
 from app.services.contents import (
-    download_youtube_video,
     get_storage_paths,
     insert_post_to_db,
     update_video_path,
@@ -7,7 +6,7 @@ from app.services.contents import (
     update_contents_description,
     delete_contents,
     get_category_id_contents_by_id,
-    delete_contents_metadata,
+    download_queue,
 )
 from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
@@ -79,25 +78,30 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
             category_id=request.category_id,
         )
 
-        # Step 2: 경로 계산 및 yt-dlp 다운로드
+        # Step 2: 경로 계산
         paths = await get_storage_paths(str(user_id), request.category_id, contents_id)
 
         # Step 3: post에 경로 업데이트
         await update_video_path(
             contents_id, paths["video_path"], paths["thumbnail_path"]
         )
-        # Step 4: YouTube 영상 다운로드
-        download_success = await download_youtube_video(request.url, paths["base"])
 
-        if not download_success:
-            # await delete_contents_metadata(contents_id, str(user_id))
-            raise Exception("영상 다운로드 실패")
+        # Step 5: 작업을 큐에 추가
+        await download_queue.put(
+            {
+                "contents_id": contents_id,
+                "youtube_url": request.url,
+                "output_base": paths["base"],
+                "user_id": str(user_id),
+            }
+        )
 
         return {
             "contents_id": contents_id,
         }
 
     except Exception as e:
+        await delete_contents(contents_id, user_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 
