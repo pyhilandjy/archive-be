@@ -1,5 +1,7 @@
 import os
 import shutil
+import asyncio
+from app.services.websocket_manager import websocket_manager
 from app.core.config import settings
 from app.db.worker import execute_insert_update_query, execute_select_query
 from app.db.contents import (
@@ -28,9 +30,6 @@ async def get_storage_paths(user_id: str, category_id: str, contents_id: str) ->
         "thumbnail_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
         "base": base_path,
     }
-
-
-import asyncio
 
 
 async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
@@ -194,3 +193,68 @@ async def get_category_id_contents_by_id(contents_id: str, user_id: str):
     except Exception as e:
         print("❌ 게시글 조회 실패:", e)
         raise e
+
+
+# 다운로드 작업 큐 정의
+download_queue: asyncio.Queue = asyncio.Queue()
+
+
+async def download_worker():
+    while True:
+        task = await download_queue.get()
+        contents_id = task["contents_id"]
+        youtube_url = task["youtube_url"]
+        output_base = task["output_base"]
+        user_id = task["user_id"]
+
+        try:
+            await update_download_status(contents_id, "ON_PROCESS")
+            await websocket_manager.send(
+                user_id,
+                {
+                    "type": "status_update",
+                    "contents_id": contents_id,
+                    "status": "ON_PROCESS",
+                },
+            )
+
+            success = await download_youtube_video(youtube_url, output_base)
+
+            new_status = "DONE" if success else "FAILED"
+            await update_download_status(contents_id, new_status)
+            await websocket_manager.send(
+                user_id,
+                {
+                    "type": "status_update",
+                    "contents_id": contents_id,
+                    "status": new_status,
+                },
+            )
+
+        except Exception as e:
+            await update_download_status(contents_id, "FAILED")
+            await websocket_manager.send(
+                user_id,
+                {
+                    "type": "status_update",
+                    "contents_id": contents_id,
+                    "status": "FAILED",
+                    "error": str(e),
+                },
+            )
+
+        finally:
+            download_queue.task_done()
+
+
+async def update_download_status(contents_id: str, status: str):
+    """
+    다운로드 상태를 업데이트
+    """
+    query = """
+    UPDATE contents
+    SET status = :status
+    WHERE id = :contents_id;
+    """
+    params = {"contents_id": contents_id, "status": status}
+    execute_insert_update_query(query, params)
