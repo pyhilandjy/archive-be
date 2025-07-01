@@ -1,4 +1,3 @@
-import subprocess
 import os
 import shutil
 from app.core.config import settings
@@ -34,7 +33,10 @@ async def get_storage_paths(user_id: str, category_id: str, contents_id: str) ->
 import asyncio
 
 
-async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
+async def download_youtube_video_optimized(youtube_url: str, output_base: str) -> bool:
+    """
+    유튜브 다운로드
+    """
     command = [
         yt_dlp_path,
         "-f",
@@ -42,27 +44,34 @@ async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
         "--write-thumbnail",
         "--convert-thumbnails",
         "jpg",
+        "--concurrent-fragments",
+        "8",
+        "--retries",
+        "3",
+        "--fragment-retries",
+        "3",
         "-o",
         output_base + ".%(ext)s",
         youtube_url,
     ]
 
-    loop = asyncio.get_event_loop()
-
     try:
-        result = await loop.run_in_executor(
-            None,
-            lambda: subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                check=True,
-            ),
+        # asyncio subprocess 사용 (I/O 바운드 최적화)
+        process = await asyncio.create_subprocess_exec(
+            *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
-        print("stdout:", result.stdout)
-        return True
-    except subprocess.CalledProcessError as e:
-        print("stderr:", e.stderr)
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode == 0:
+            print(f"다운로드 성공: {youtube_url}")
+            return True
+        else:
+            print(f"다운로드 실패 - stderr: {stderr.decode()}")
+            return False
+
+    except Exception as e:
+        print(f"다운로드 오류: {str(e)}")
         return False
 
 
