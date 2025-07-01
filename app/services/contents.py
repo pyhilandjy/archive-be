@@ -33,7 +33,7 @@ async def get_storage_paths(user_id: str, category_id: str, contents_id: str) ->
 import asyncio
 
 
-async def download_youtube_video_optimized(youtube_url: str, output_base: str) -> bool:
+async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
     """
     유튜브 다운로드
     """
@@ -64,6 +64,7 @@ async def download_youtube_video_optimized(youtube_url: str, output_base: str) -
         stdout, stderr = await process.communicate()
 
         if process.returncode == 0:
+            print("stdout:", stdout.decode())
             print(f"다운로드 성공: {youtube_url}")
             return True
         else:
