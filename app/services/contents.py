@@ -11,6 +11,7 @@ from app.db.contents import (
     UPDATE_CONTENTS_DESCRIPTION,
     DELETE_CONTENTS,
     SELECT_CONTENTS_CATEGORY_BY_ID,
+    UPDATE_CONTENTS_STATUS,
 )
 
 yt_dlp_path = "/usr/local/bin/yt-dlp"
@@ -251,10 +252,5 @@ async def update_download_status(contents_id: str, status: str):
     """
     다운로드 상태를 업데이트
     """
-    query = """
-    UPDATE contents
-    SET status = :status
-    WHERE id = :contents_id;
-    """
     params = {"contents_id": contents_id, "status": status}
-    execute_insert_update_query(query, params)
+    execute_insert_update_query(query=UPDATE_CONTENTS_STATUS, params=params)

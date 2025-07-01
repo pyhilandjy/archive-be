@@ -47,3 +47,12 @@ DELETE_CONTENTS = text(
     WHERE id = :contents_id and user_id = :user_id
     """
 )
+
+
+UPDATE_CONTENTS_STATUS = text(
+    """
+    update contents
+    set status = :status
+    where id = :contents_id
+    """
+)
