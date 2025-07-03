@@ -74,6 +74,7 @@ async def download_youtube_video(youtube_url: str, output_base: str) -> bool:
 
     except Exception as e:
         print(f"다운로드 오류: {str(e)}")
+        print(f"❌ 다운로드 실패: {youtube_url}")
         return False
 
 
