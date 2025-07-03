@@ -7,18 +7,22 @@ from app.services.contents import (
     delete_contents,
     get_category_id_contents_by_id,
     download_queue,
+    fetch_all_titles_and_urls_from_playlist,
+    remove_queryparams_youtube_url,
 )
 from app.core.session import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
 
 class PostRequest(BaseModel):
-    title: str
+    title: Optional[str] = None
     url: str
     category_id: str
+    is_list: bool
 
 
 class UpdateDescriptionRequest(BaseModel):
@@ -67,41 +71,39 @@ async def update_post_description(
 
 @router.post("/contents")
 async def create_post(request: PostRequest, user_id: str = Depends(get_current_user)):
-    """
-    게시물 업로드 API
-    """
+    contents_id = None
     try:
-        # Step 1: post 삽입
-        contents_id = await insert_post_to_db(
-            title=request.title,
-            user_id=user_id,
-            category_id=request.category_id,
-        )
+        if request.is_list:
+            videos = await fetch_all_titles_and_urls_from_playlist(request.url)
+        else:
+            clean_url = remove_queryparams_youtube_url(request.url)
+            videos = [{"title": request.title or "", "url": clean_url}]
 
-        # Step 2: 경로 계산
-        paths = await get_storage_paths(str(user_id), request.category_id, contents_id)
+        for video in videos:
+            vid_title = video["title"] or video.get("title", "")
+            vid_id = await insert_post_to_db(
+                title=vid_title,
+                user_id=user_id,
+                category_id=request.category_id,
+            )
+            paths = await get_storage_paths(str(user_id), request.category_id, vid_id)
+            await update_video_path(
+                vid_id, paths["video_path"], paths["thumbnail_path"]
+            )
+            await download_queue.put(
+                {
+                    "contents_id": vid_id,
+                    "youtube_url": video["url"],
+                    "output_base": paths["base"],
+                    "user_id": str(user_id),
+                }
+            )
 
-        # Step 3: post에 경로 업데이트
-        await update_video_path(
-            contents_id, paths["video_path"], paths["thumbnail_path"]
-        )
-
-        # Step 5: 작업을 큐에 추가
-        await download_queue.put(
-            {
-                "contents_id": contents_id,
-                "youtube_url": request.url,
-                "output_base": paths["base"],
-                "user_id": str(user_id),
-            }
-        )
-
-        return {
-            "contents_id": contents_id,
-        }
+        return {"contents_id": contents_id}
 
     except Exception as e:
-        await delete_contents(contents_id, user_id)
+        if contents_id:
+            await delete_contents(contents_id, user_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -116,3 +118,11 @@ async def delete_post(contents_id: str, user_id: str = Depends(get_current_user)
         return {"message": "게시물이 성공적으로 삭제되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/youtube-playlist")
+async def get_youtube_playlist(playlist_url: str):
+    """
+    유튜브 플레이리스트에서 비디오 목록을 가져오는 API
+    """
+    return await remove_queryparams_youtube_url(playlist_url)
