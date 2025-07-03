@@ -76,8 +76,8 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
         if request.is_list:
             videos = await fetch_all_titles_and_urls_from_playlist(request.url)
         else:
-            clean_url = remove_queryparams_youtube_url(request.url)
-            videos = [{"title": request.title or "", "url": clean_url}]
+            clean_url = await remove_queryparams_youtube_url(request.url)
+            videos = [{"title": request.title, "url": clean_url}]
         print(f"📥 비디오 목록: {videos}")
         for video in videos:
             vid_title = video["title"] or video.get("title", "")
