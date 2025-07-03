@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import asyncio
 from app.services.websocket_manager import websocket_manager
@@ -254,3 +255,49 @@ async def update_download_status(contents_id: str, status: str):
     """
     params = {"contents_id": contents_id, "status": status}
     execute_insert_update_query(query=UPDATE_CONTENTS_STATUS, params=params)
+
+
+async def fetch_all_titles_and_urls_from_playlist(playlist_url: str) -> list[dict]:
+    """
+    유튜브 플레이리스트나 자동 재생 리스트에서 모든 영상의 {title, url} 목록 추출
+    """
+    try:
+        command = [
+            yt_dlp_path,
+            "--flat-playlist",
+            "--print-json",
+            "--no-warnings",
+            playlist_url,
+        ]
+
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            raise RuntimeError(f"yt-dlp 오류: {stderr.decode().strip()}")
+
+        # 출력된 JSON 라인별 파싱
+        items = []
+        for line in stdout.decode().strip().splitlines():
+            info = json.loads(line)
+            if "title" in info and "id" in info:
+                items.append(
+                    {
+                        "title": info["title"],
+                        "url": f"https://www.youtube.com/watch?v={info['id']}",
+                    }
+                )
+
+        return items
+
+    except Exception as e:
+        print(f"❌ 플레이리스트 영상 정보 추출 실패: {str(e)}")
+        raise e
+
+
+async def remove_queryparams_youtube_url(url):
+    return url.split("&", 1)[0]
