@@ -78,7 +78,7 @@ async def create_post(request: PostRequest, user_id: str = Depends(get_current_u
         else:
             clean_url = remove_queryparams_youtube_url(request.url)
             videos = [{"title": request.title or "", "url": clean_url}]
-
+        print(f"📥 비디오 목록: {videos}")
         for video in videos:
             vid_title = video["title"] or video.get("title", "")
             vid_id = await insert_post_to_db(
