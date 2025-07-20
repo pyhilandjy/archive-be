@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import asyncio
+from uuid import uuid4
 from app.services.websocket_manager import websocket_manager
 from app.core.config import settings
 from app.db.worker import execute_insert_update_query, execute_select_query
@@ -28,8 +29,8 @@ async def get_storage_paths(user_id: str, category_id: str, contents_id: str) ->
     base_path = os.path.join(user_dir, filename)
 
     return {
-        "video_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
-        "thumbnail_path": f"{be_url}/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
+        "video_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.mp4",
+        "thumbnail_path": f"/videos/user_{user_id}/category_{category_id}/{filename}.jpg",
         "base": base_path,
     }
 
@@ -122,9 +123,17 @@ async def get_contents_by_id(contents_id: str, user_id: str):
             query=SELECT_CONTENTS_BY_ID,
             params={"contents_id": contents_id, "user_id": user_id},
         )
-        return contents
+        updated_contents = []
+        for item in contents:
+            item = dict(item)
+            if "thumbnail_path" in item:
+                item["thumbnail_path"] = settings.be_url + item["thumbnail_path"]
+            if "video_path" in item:
+                item["video_path"] = settings.be_url + item["video_path"]
+            updated_contents.append(item)
+
+        return updated_contents
     except Exception as e:
-        print("❌ 게시글 조회 실패:", e)
         raise e
 
 
